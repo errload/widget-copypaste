@@ -186,7 +186,7 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
                         isError = true;
                     } else leads.contacts = contactsLabels;
 
-                    // добавляем параметр tags
+                    // добавляем параметр products
                     var productsLabel = $('.modal__radioproducts__wrapper .control-radio');
                     $.each(productsLabel, function () {
                         if ($(this).hasClass('icon-radio-checked')) {
