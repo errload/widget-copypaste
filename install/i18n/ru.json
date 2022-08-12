@@ -1,0 +1,11 @@
+{
+    "widget": {
+        "name": "Копипаст сделок",
+        "short_description": "Копипаст сделок",
+        "description": "Копипаст сделок",
+        "tour_description": "Копипаст сделок"
+    },
+    "settings": {
+        "config_settings": "Настройки"
+    }
+}
