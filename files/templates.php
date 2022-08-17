@@ -118,50 +118,6 @@
                     usleep(200);
                 }
 
-                // перебираем примечания и создаем такие же для новой сделки
-                if (in_array('notes', $_POST['leads']['history'])) {
-                    $leadNotesService = $apiClient->notes(EntityTypesInterface::LEADS);
-                    usleep(200);
-
-                    try {
-                        $leadNotes = $leadNotesService->getByParentId($leadInfo->getId());
-                        usleep(200);
-                    } catch (AmoCRMApiException $e) { return; }
-
-                    if ($leadNotes->count() > 0) $isNotes = true;
-                    while ($isNotes) {
-                        $notesCollection = new NotesCollection();
-
-                        foreach ($leadNotes as $leadNote) {
-                            $model = '\\' . get_class($leadNote);
-                            if ($model == '\AmoCRM\Models\NoteType\AttachmentNote') continue;
-                            $note = new $model();
-                            $leadNote = (array) $leadNote;
-
-                            foreach ($leadNote as $key => $val) {
-                                $leadKey = $key;
-                                $leadKey = str_replace('*', '', $leadKey);
-                                $leadKey = 'set' . ucfirst(trim($leadKey));
-
-                                if ($leadKey == 'setModelClass' || $leadKey == 'setId') continue;
-                                if ($leadKey == 'setEntityId') $note->$leadKey($lead->getId());
-                                else $note->$leadKey($val);
-                            }
-
-                            $notesCollection->add($note);
-                        }
-
-                        if ($leadNotes->getNextPageLink()) {
-                            $leadNotes = $leadNotesService->nextPage($leadNotes);
-                            usleep(200);
-                            $isNotes = true;
-                        } else $isNotes = false;
-
-                        if ($notesCollection->count()) $leadNotesService->add($notesCollection);
-                        usleep(200);
-                    }
-                }
-
                 // создаем копии задач, если отмечены
                 if (in_array('tasksFinish', $_POST['leads']['history']) ||
                     in_array('tasksNotFinish', $_POST['leads']['history'])) {
@@ -202,13 +158,57 @@
                             $taskCollection->add($newTask);
                         }
 
+                        if ($taskCollection->count()) $apiClient->tasks()->add($taskCollection);
+                        usleep(200);
+
                         if ($tasksCollection->getNextPageLink()) {
                             $tasksCollection = $apiClient->tasks()->nextPage($tasksCollection);
                             usleep(200);
                             $isTasks = true;
                         } else $isTasks = false;
+                    }
+                }
 
-                        if ($taskCollection->count()) $apiClient->tasks()->add($taskCollection);
+                // перебираем примечания и создаем такие же для новой сделки
+                if (in_array('notes', $_POST['leads']['history'])) {
+                    $leadNotesService = $apiClient->notes(EntityTypesInterface::LEADS);
+                    usleep(200);
+
+                    try {
+                        $leadNotes = $leadNotesService->getByParentId($leadInfo->getId());
+                        usleep(200);
+                    } catch (AmoCRMApiException $e) { return; }
+
+                    if ($leadNotes->count() > 0) $isNotes = true;
+                    while ($isNotes) {
+                        $notesCollection = new NotesCollection();
+
+                        foreach ($leadNotes as $leadNote) {
+                            $model = '\\' . get_class($leadNote);
+                            if ($model == '\AmoCRM\Models\NoteType\AttachmentNote') continue;
+                            $note = new $model();
+                            $leadNote = (array) $leadNote;
+
+                            foreach ($leadNote as $key => $val) {
+                                $leadKey = $key;
+                                $leadKey = str_replace('*', '', $leadKey);
+                                $leadKey = 'set' . ucfirst(trim($leadKey));
+
+                                if ($leadKey == 'setModelClass' || $leadKey == 'setId') continue;
+                                if ($leadKey == 'setEntityId') $note->$leadKey($lead->getId());
+                                else $note->$leadKey($val);
+                            }
+
+                            $notesCollection->add($note);
+                        }
+
+                        if ($leadNotes->getNextPageLink()) {
+                            $leadNotes = $leadNotesService->nextPage($leadNotes);
+                            usleep(200);
+                            $isNotes = true;
+                        } else $isNotes = false;
+
+                        if ($notesCollection->count()) $leadNotesService->add($notesCollection);
                         usleep(200);
                     }
                 }

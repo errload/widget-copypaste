@@ -60,6 +60,7 @@ define(['jquery', 'underscore', 'twigjs', 'lib/components/base/modal'], function
 
         // добавляем ссылку в карточку
         this.linkToLeadsCard = function () {
+            if (AMOCRM.getWidgetsArea() !== 'leads_card') return;
             if (!AMOCRM.isCard()) return;
 
             // если пользователь не отмечен в настройках, ссылку не показываем
